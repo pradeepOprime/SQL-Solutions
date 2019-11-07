@@ -150,3 +150,22 @@ and STG.FLAG > 0 or STG.FLAG is null then 'end' else 'cnted' end FLG3
     , STG5 as (Select End_date, Row_number() over(Order by END_DATE) rn  
 	from STG2 where FLG2 = 'end' or FLG3='end') select STG4.Start_date,STG5.END_Date 
 	from STG4 join STG5 on STG4.rn = stg5.rn order by STG5.END_Date - STG4.Start_date,STG4.Start_date   ;
+
+
++_+_+_+_+_+_+
+	
+	
+with STG as (
+select Task_ID, Start_Date, End_Date ,  
+Lead(Start_date,1) over (Order by Start_date) - End_date  Flag from Projects), 
+STG2 as (select STG.*, Case when Lag(STG.FLAG,1) over (Order by Start_date) > 0 or
+Lag(STG.FLAG,1) over (Order by Start_date) is null then 'FST' When STG.FLAG > 0 then 'end' 
+else 'Chill' end FLG2 , Case when Lead(STG.FLAG,1) over (Order by Start_date) >= 0 
+and STG.FLAG > 0 or STG.FLAG is null then 'end' else 'cnted' end FLG3
+  from STG),STG4 as (
+    Select Start_date, Row_number() over(Order by Start_date) rn from STG2 where FLG2 = 'FST')
+    , STG5 as (Select End_date, Row_number() over(Order by END_DATE) rn  
+	from STG2 where FLG2 = 'end' or FLG3='end') select STG4.Start_date,STG5.END_Date 
+	from STG4 join STG5 on STG4.rn = stg5.rn order by STG5.END_Date - STG4.Start_date,STG4.Start_date   ;
+	
+	
